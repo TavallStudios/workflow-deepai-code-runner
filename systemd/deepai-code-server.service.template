@@ -1,0 +1,15 @@
+[Unit]
+Description=DeepAI Code headless server (web mode, loopback; reach it over an SSH tunnel)
+After=network-online.target
+
+[Service]
+ExecStart=@INSTALL_ROOT@/bin/deepai-runner-server.sh
+Environment=DEEPAI_CODE_INSTALL_ROOT=@INSTALL_ROOT@
+Environment=DEEPAI_CODE_DATA_DIR=@DATA_DIR@
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:@DATA_DIR@/server.log
+StandardError=append:@DATA_DIR@/server.log
+
+[Install]
+WantedBy=default.target
