@@ -1,0 +1,35 @@
+{
+  "workflowId": "deepai-code-runner",
+  "name": "DeepAI Code Runner",
+  "version": "0.1.0",
+  "summary": "Runs the DeepAI Code desktop app headless on a Linux host as a local AI worker pool: loopback web-mode server, tunnelable sign-in, one-time pairing, worker launcher with model fallback, and a model-scoped 429 cooldown ledger.",
+  "notice": "This is a source descriptor for a locally-executed runner package. It defines no new workflow manifest format and makes no claim of a deployed Workflows runtime or MCP endpoint. The DeepAI Code application is upstream MIT software (DeepAI, t3code lineage); see NOTICE.md.",
+  "contract": {
+    "type": "local-runner-package",
+    "declaredIn": "TavallStudios/workflow-deepai-code-runner :: bin/",
+    "implementation": "TavallStudios/workflow-deepai-code-runner :: bin/deepai-worker-launcher.sh + bin/deepai-worker-client.mjs",
+    "invoke": "bin/deepai-worker-launcher.sh <id> <model[,fallback...]> <prompt-file> [--probe <model>]",
+    "discovery": "headless DeepAI Code server surfaces: `auth session issue` (scoped short-lived bearer), orchestration HTTP API + WebSocket protocol, `server.getConfig` live model catalog",
+    "iworkflowRunnerIntegration": "not yet implemented; tracked in TavallStudios/workflow-deepai-code-runner#1"
+  },
+  "capabilities": [
+    { "name": "headless-server", "kind": "runtime", "surface": "bin/deepai-runner-server.sh (loopback web mode, systemd user unit)" },
+    { "name": "tunnelable-sign-in", "kind": "patch", "surface": "patches/deepai-code-0.3.42-auth-callback-port.patch (DEEPAI_AUTH_CALLBACK_PORT, three lines, local/self-maintained)" },
+    { "name": "pairing", "kind": "runtime", "surface": "bin/new-pairing-link.sh (one-time links)" },
+    { "name": "worker-run", "kind": "execution", "surface": "bin/deepai-worker-launcher.sh (scoped session in process memory, terminal-run streaming, JSON output)" },
+    { "name": "quota-cooldown-ledger", "kind": "ledger", "surface": "bin/deepai_quota.py (model-scoped 429 cooldowns; productization tracked in TavallStudios/tavall-ai#174)" },
+    { "name": "unattended-approver", "kind": "optional", "surface": "bin/deepai-auto-approver.mjs (opt-in, title-scoped)" }
+  ],
+  "sourceRepository": "https://github.com/TavallStudios/workflow-deepai-code-runner",
+  "verification": {
+    "pullRequest": "https://github.com/TavallStudios/workflow-deepai-code-runner/pull/2",
+    "headSha": "d6c7dd5",
+    "result": "L0 syntax PASS (bash/node/python); L2 patch apply on the real 0.3.42 original bundle, quota ledger lifecycle and launcher error paths PASS; L3 real end-to-end probe deepai/glm-5.3-flash against the live headless server PASS. No full CI."
+  },
+  "security": {
+    "excludedFromPackaging": ["tokens", "pairing links", "data/", "credentials"],
+    "runtimeMode": "DEEPAI_WORKER_RUNTIME_MODE defaults to auto; full-access is an explicit opt-in",
+    "approver": "opt-in and title-scoped; full-access grant requires DEEPAI_AUTO_APPROVER_FULL_ACCESS=1"
+  },
+  "license": "MIT"
+}
