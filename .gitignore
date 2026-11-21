@@ -1,0 +1,9 @@
+data/
+*.log
+*-out.json
+*-exit.txt
+*-worker.log
+*.orig-unpatched
+.env
+quota-ledger.json
+__pycache__/
